@@ -10,31 +10,35 @@ class Syrius(models.Model):
     
     def __str__(self):
         return self.title
-    
+
+#----------------task 3 ----------------------------------
+class Victorina(models.Model):
+    id = models.IntegerField(primary_key=True)
+    answer = models.TextField(max_length=255)
+    question = models.TextField()
+    value = models.IntegerField(null=True)
+    airdate = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
+    category_id = models.IntegerField()
+    game_id = models.IntegerField()
+    cat = models.ForeignKey('Category', on_delete=models.PROTECT, null=True)
+
+    def __str__(self):
+        return self.id
+
+class Category(models.Model):
+    id = models.IntegerField(primary_key=True)
+    title = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add = True)
+    updated_at = models.DateTimeField(auto_now_add = True)
+    clues_count = models.IntegerField()
+
+
+    def __str__(self):
+        return self.title
 
 
 
 
 
-
-
-
-
-
-
-
-# class ImageSyrius(models.Model):
-#     name = models.CharField(max_length=100, db_index = True)
-#     img_field = Base64ImageField(required=False)
-    
-#     def __str__(self):
-#         return self.name
-
-
-
-    
-# class Category(models.Model):
-#     name = models.CharField(max_length=100, db_index=True, verbose_name='Категория')
-    
-#     def __str__(self):
-#         return self.name

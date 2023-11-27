@@ -3,13 +3,11 @@ from .models import Syrius
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from .serializers import ImageBase64Serilizer
+from .serializers import *
 from django.http.response import JsonResponse
 from rest_framework import status
-
-
-
-
+import requests
+from .models import Victorina
 #----------------api-----------------------------      
 #POST       
 @api_view(["POST"])
@@ -47,26 +45,58 @@ def syrius_list_delete(request, pk):
         return JsonResponse({'message': 'Images was deleted successfully!'}, status = status.HTTP_204_NO_CONTENT)
 
 
+#---------------Task 3----------------------------------------------------
 
+class Test(APIView):
+    # Task 3.1
+    def __init__(self, x, y): 
+        try:
+            self.x = int(x)
+            self.y = int(y)  
+            
+        except ValueError:
+             ValueError(f'Arguments x = {x} or y = {y} is not a number')
 
-
-
-
-
-# class SyriusAPIView(APIView):
-#     def get(self, request): # получение ресура (чтение)
-#         #получаем набор всех записей 
-#         s = Syrius.objects.all()
-#         return Response({'cars': SyriusSerialiazer(instance= s, many=True).data})
     
-#     def post(self, request): #добавление новой записи 
-#         serializer = SyriusSerialiazer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
+    # Task 3.2
+    def post(self, request):
+        count = request.data.get('count')
+        if request.method == "POST":
+            victorins = requests.get('http://jservice.io/api/random', params={'count':count})                 
+            data = victorins.json()
+            for v in data:
+                serializer = VictorinSerializator(data=v)
+                cat_serializer = CategorySerializator(data=v.get('category'))
+                if serializer.is_valid() and cat_serializer.is_valid():
+                    
+                    ids = serializer.validated_data['id']   #Проверка на уникальность в БД
+                    if Victorina.objects.filter(id=ids).count()==1:  # Проверка на уникальность в БД
+                        continue
+
+                    serializer.save()
+                    cat_serializer.save()
+                    
+
+            return Response({'post': f"{count} victorins added successfully!"})
+    
+    # Task 3.4
+    def get(self, request):
+        name = request.data.get('name')
+
+        if type(name) == str:
+            try:
+                count = Category.objects.filter(title=name).count()
+                
+            except ValueError:
+                ValueError('Argument is not correct')
+            
+            return Response({'message': f"There are {count} entries in the category"})
+        else:
+            return Response({'message': 'The category does not found'}, status=status.HTTP_404_NOT_FOUND)
         
-#         return Response({'post': serializer.data})
     
-#     def delete(self, request, *args, **kwargs):
-#         pk = kwargs.get("pk", None)
-#         if not pk:
-#             return Response({"error": "Method DELETE not allowed"})
+    
+            
+            
+
+

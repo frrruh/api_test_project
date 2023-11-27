@@ -1,17 +1,8 @@
 from rest_framework import serializers
 from .models import Syrius
 from drf_extra_fields.fields import Base64ImageField  
+from .models import Victorina, Category
 
-
-
-
-# class ImagesSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Syrius
-#         fields = ('id',
-#                   'title',
-#                   'content',
-#                   'image')
 
     
 class ImageBase64Serilizer(serializers.ModelSerializer):
@@ -20,22 +11,23 @@ class ImageBase64Serilizer(serializers.ModelSerializer):
         model = Syrius
         fields = ["title", "description", "image"]
         
-        
-    
-    
-    
-    
+#---------------------------task 3---------------------------    
+class VictorinSerializator(serializers.ModelSerializer):
+    class Meta:
+        model = Victorina
+        fields = ['id','answer', 
+                  'question', 'value', 
+                  'airdate', 'created_at', 
+                  'updated_at', 'category_id', 
+                  'game_id']
+    def create(self, validated_data):
+        return Victorina.objects.create(**validated_data)
 
-
-# class SyriusSerialiazer(serializers.Serializer):
-#     content = serializers.CharField()
-
-
-#     def create(self, validated_data):
-#         return Syrius.object.create(**validated_data)
+class CategorySerializator(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id','title','created_at',
+                  'updated_at','clues_count']
     
-#     def update(self, instance, validated_data):
-#         instance.content = validated_data.get("content", instance.content)
-#         instance.photo = validated_data.get("photo", instance.photo)
-#         instance.save()
-#         return instance
+    def create(self, validated_data):
+       return Category.objects.create(**validated_data)
