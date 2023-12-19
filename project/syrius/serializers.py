@@ -5,12 +5,25 @@ from .models import Victorina, Category
 
 
     
+
+
 class ImageBase64Serilizer(serializers.ModelSerializer):
     image = Base64ImageField(required=False)
     class Meta:
         model = Syrius
         fields = ["title", "description", "image"]
         
+
+
+
+
+
+
+
+
+
+
+
 #---------------------------task 3---------------------------    
 class VictorinSerializator(serializers.ModelSerializer):
     class Meta:

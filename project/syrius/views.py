@@ -1,64 +1,59 @@
-from django.shortcuts import render
 from .models import Syrius
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
 from .serializers import *
-from django.http.response import JsonResponse
-from rest_framework import status
+from rest_framework import status, generics
 import requests
 from .models import Victorina
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser, IsAuthenticated
+from .permissions import IsAdminReadOnly, IsOwnerOrReadOnly
+from rest_framework.pagination import PageNumberPagination
 #----------------api-----------------------------      
-#POST       
-@api_view(["POST"])
-def base64_image_upload_api_view(request):
-    if request.method == "POST":
-        data = request.data
-        serializer = ImageBase64Serilizer(data=data)
-        if serializer.is_valid():
-            image = serializer.save()
-            data = serializer.data
-            return Response(data=data)
-        return Response(serializer.errors, status=400)
-     
-#GET
-@api_view(["GET"])
-def syrius_list_published(request):
-    images = Syrius.objects.all()
+# class SyriusViewSet(viewsets.ModelViewSet):
+#     queryset = Syrius.objects.all()  
+#     serializer_class = ImageBase64Serilizer
+
+#     # def get_queryset(self): #Чтобы вывести определенное кол-во записей
+#     #     return Syrius.objects.all()[:5]
+
+
+
+class SyriusAPIListPagination(PageNumberPagination):
+    page_size = 3
+    page_size_query_param = 'page_size'
+    max_page_size = 10000
     
-    if request.method == 'GET':
-        images_serializer = ImageBase64Serilizer(images, many=True) 
-        return JsonResponse(images_serializer.data, safe=False)
+class SyriusAPIList(generics.ListCreateAPIView):
+    queryset = Syrius.objects.all()
+    serializer_class = ImageBase64Serilizer
+    permission_classes = (IsAuthenticatedOrReadOnly, )
+    pagination_class = SyriusAPIListPagination
 
 
-#DELETE
-@api_view(["DELETE"])
-def syrius_list_delete(request, pk):
-    try:
-        images = Syrius.objects.get(pk=pk)
-    except Syrius.DoesNotExist:
-        return JsonResponse({'message': 'The image does not found'}, status=status.HTTP_404_NOT_FOUND)
-    
-
-    if request.method == 'DELETE':
-        images.delete()
-        return JsonResponse({'message': 'Images was deleted successfully!'}, status = status.HTTP_204_NO_CONTENT)
+class SyriusAPIUpdate(generics.RetrieveUpdateAPIView):
+    queryset = Syrius.objects.all()
+    serializer_class = ImageBase64Serilizer
+    permission_classes = (IsAuthenticated, )
 
 
-#---------------Task 3----------------------------------------------------
+class SyriusAPIDestroy(generics.RetrieveDestroyAPIView):
+    queryset = Syrius.objects.all()
+    serializer_class = ImageBase64Serilizer
+    permission_classes = (IsAdminReadOnly, )
+
+
+
+
+
+
+
+
+
+
+#---------------API for external resource----------------------------------------------------
 
 class Test(APIView):
-    # Task 3.1
-    def __init__(self, x, y): 
-        try:
-            self.x = int(x)
-            self.y = int(y)  
-            
-        except ValueError:
-             ValueError(f'Arguments x = {x} or y = {y} is not a number')
-
-    
-    # Task 3.2
     def post(self, request):
         count = request.data.get('count')
         if request.method == "POST":
@@ -78,7 +73,6 @@ class Test(APIView):
                     
 
             return Response({'post': f"{count} victorins added successfully!"})
-    
     # Task 3.4
     def get(self, request):
         name = request.data.get('name')
@@ -96,7 +90,10 @@ class Test(APIView):
         
     
     
-            
+
+class ImageAPIList(generics.ListCreateAPIView):
+    queryset = Syrius.objects.all()
+    serializer_class = ImageBase64Serilizer
             
 
 
